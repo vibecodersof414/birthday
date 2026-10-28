@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Happy Birthday Supriya</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:#000;overflow-x:hidden;overflow-y:auto;font-family:'Poppins',sans-serif;color:#ffb6d9}
+canvas{position:fixed;inset:0;width:100%;height:100%}
+#stars{opacity:0;transition:opacity 1.5s}#stars.on{opacity:1}
+#rain{opacity:1;transition:opacity 2.6s ease-out}#rain.off{opacity:0}
+#pop{pointer-events:none;z-index:50}
+.hidden{display:none!important}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;text-align:center;padding:16px}
+.screen{transition:opacity .8s ease}
+.screen.fade-away{opacity:0;pointer-events:none}
+.startTxt{color:#fff;font-family:'Dancing Script',cursive;font-size:2rem;margin-bottom:22px;text-shadow:0 0 12px #ff3d9a}
+button{font:inherit}
+#startBtn{background:transparent;color:#fff;border:2px solid #fff;border-radius:40px;padding:14px 34px;font-size:1.05rem;box-shadow:none}
+#count{font-size:clamp(12rem,32vw,22rem);color:#ffc2e2;text-shadow:0 0 18px #ff3d9a}
+#word{width:100%;max-width:100vw;padding:12px 8px;font-family:'Dancing Script',cursive;font-size:clamp(3rem,13vw,7.2rem);font-weight:700;line-height:1.02;color:#ffb5df;text-shadow:0 0 4px #fff0f8,0 0 12px #ff69b4,0 0 26px #ff2f98,0 0 42px rgba(255,47,152,.7);overflow-wrap:break-word}
+#word span{display:block;line-height:1.02}
+#word #wName{font-family:'Poppins',sans-serif;font-size:clamp(1.5rem,6vw,2.6rem);font-weight:600;letter-spacing:.08em;line-height:1.35;color:#ff9acb;text-shadow:0 0 5px rgba(255,105,180,.5);text-transform:none}
+@media(max-width:380px){#word{font-size:clamp(2.65rem,12vw,4rem);padding-inline:4px}#word #wName{font-size:clamp(1.35rem,5.8vw,1.8rem)}}
+.pulse{animation:pulse .9s ease both}
+#word span{display:block;line-height:1.08}
+#word.slow{animation:slowFade 2.4s ease-in-out both}
+@keyframes slowFade{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%{opacity:0;transform:scale(.4)}35%{opacity:1;transform:scale(1.1)}100%{opacity:1;transform:scale(1)}}
+#heart{position:fixed;z-index:6;top:50%;left:50%;width:34vw;max-width:170px;transform:translate(-50%,-50%);animation:beat 1.1s infinite}
+@keyframes beat{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
+#char{width:min(70vw,320px);animation:pop .6s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+.hint{font-size:.72rem;opacity:.6;margin-top:16px;font-weight:600}
+/* music button */
+#musicBtn{position:fixed;z-index:100;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;width:42px;height:42px;border-radius:50%;border:1.5px solid #ff8cc8;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:grid;place-items:center}
+#musicBtn svg{width:20px;height:20px;fill:#ff8cc8}
+#musicBtn.playing #icoPlay,#musicBtn:not(.playing) #icoPause{display:none}
+/* album: one object that starts closed (cover) and opens into a two-page spread */
+#album{justify-content:center;padding:16px}
+#album.enter{animation:albumIn 1.1s cubic-bezier(.2,.7,.2,1) backwards}
+@keyframes albumIn{from{opacity:0;transform:translateY(26px) scale(.9)}to{opacity:1;transform:none}}
+#stage{position:relative;width:min(94vw,520px)}
+#bookShift{transform:translateX(-25%);transition:transform 1.35s cubic-bezier(.65,0,.25,1)}
+#bookShift.opened{transform:none}
+#book{position:relative;width:100%;aspect-ratio:3/2;display:flex;perspective:1500px;cursor:pointer}
+.pg{position:relative;width:50%;height:100%;overflow:hidden;background:#222;box-shadow:0 0 24px rgba(0,0,0,.6)}
+.pg.left{visibility:hidden}
+#book.ready .pg.left{visibility:visible}
+.pg::after{content:"";position:absolute;top:0;bottom:0;width:14%;pointer-events:none}
+.pg.left::after{right:0;background:linear-gradient(to left,rgba(0,0,0,.28),transparent)}
+.pg.right::after{left:0;background:linear-gradient(to right,rgba(0,0,0,.28),transparent)}
+.pg img,.fl img,.cv img{width:100%;height:100%;object-fit:cover;display:block}
+.fl{position:absolute;top:0;width:50%;height:100%;transform-style:preserve-3d;transition:transform .9s ease-in-out}
+.fl.r{left:50%;transform-origin:left center}.fl.l{left:0;transform-origin:right center}
+.fl>div,.cv>div{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.fl>.bk,.cv>.bk{transform:rotateY(180deg)}
+/* the front cover: hinged on the spine (centre of the book), swings over to become the left page */
+.cv{position:absolute;top:0;left:50%;width:50%;height:100%;transform-origin:left center;transform-style:preserve-3d;transition:transform 1.35s cubic-bezier(.65,0,.25,1);z-index:3}
+#bookShift.opened .cv{transform:rotateY(-180deg)}
+#book.ready .cv{display:none}
+.cv>.ft{border-radius:3px 12px 12px 3px;background:#f4eee3;box-shadow:0 0 0 2px rgba(255,255,255,.55) inset,0 8px 28px rgba(0,0,0,.55);animation:glow 2.4s ease-in-out infinite}
+#bookShift.opened .cv>.ft{animation:none}
+.cv>.ft::after{content:"";position:absolute;top:0;bottom:0;left:0;width:9%;background:linear-gradient(to right,rgba(0,0,0,.22),rgba(255,255,255,.18) 55%,transparent);pointer-events:none}
+.cv>.bk{box-shadow:0 0 24px rgba(0,0,0,.6)}
+@keyframes glow{50%{box-shadow:0 0 0 2px rgba(255,255,255,.55) inset,0 8px 34px rgba(255,120,190,.65)}}
+.tap{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);white-space:nowrap;padding:7px 18px;border-radius:30px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.7);color:#fff;font-family:'Dancing Script',cursive;font-size:clamp(1rem,4.2vw,1.35rem);font-weight:700;animation:breathe 1.8s ease-in-out infinite;transition:opacity .5s}
+#bookShift.opened .tap{opacity:0;animation:none}
+@keyframes breathe{50%{transform:translateX(-50%) scale(1.07)}}
+#msg{position:absolute;left:50%;bottom:calc(100% + 24px);width:100%;min-height:72px;background:#f6e7c1;border-radius:14px;padding:18px 34px 18px 18px;color:#a8725a;font-family:'Dancing Script',cursive;font-size:1.3rem;font-weight:500;box-shadow:0 0 16px rgba(255,230,180,.25);opacity:0;transform:translate(-50%,14px);transition:opacity .9s ease,transform .9s ease;pointer-events:none}
+#msg.show{opacity:1;transform:translate(-50%,0)}
+.mh{position:absolute;top:6px;right:9px;font-size:.8rem;font-style:normal}
+#turnHint{position:absolute;left:0;right:0;top:calc(100% + 18px);margin:0;opacity:0;transition:opacity .9s}
+#turnHint.show{opacity:.6}
+
+/* Finale scroll choreography. The star canvas remains fixed behind everything. */
+#finale{display:none;position:relative;height:7600px;z-index:4;pointer-events:none}
+#finale.active{display:block}
+#scrollHint{position:fixed;z-index:8;left:0;right:0;bottom:calc(12vh + env(safe-area-inset-bottom,0px));padding:0 18px;text-align:center;color:#ffe7a0;font-size:clamp(.95rem,4vw,1.2rem);font-weight:600;opacity:0;transition:opacity .8s;text-shadow:0 0 7px #fff1b0,0 0 16px #ffc83d,0 0 28px #ff9d00;animation:scrollGlow 1.8s ease-in-out infinite;pointer-events:none}
+@keyframes scrollGlow{0%,100%{filter:brightness(.62);text-shadow:0 0 5px #ffd76a,0 0 12px #ffb700;transform:translateY(0)}50%{filter:brightness(1.35);text-shadow:0 0 9px #fff4bd,0 0 22px #ffd34d,0 0 34px #ffad00;transform:translateY(-2px)}}
+#heartStage{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.heart-photo{position:absolute;left:50%;top:115%;width:clamp(30px,7vw,50px);aspect-ratio:3/4;object-fit:cover;border:3px solid #fff;border-radius:9px;box-shadow:0 5px 22px #ff72bd66;will-change:transform,top,left,opacity;opacity:0}
+#finalMessage{position:fixed;z-index:20;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);width:min(88vw,460px);text-align:center;opacity:0;transition:opacity .8s,transform .8s;pointer-events:none}
+#finalMessage.visible{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#finalCharacter{width:min(42vw,190px);max-height:30vh;object-fit:contain;display:block;margin:0 auto 12px}
+.finalCard{background:rgba(255,255,255,.94);color:#9b456e;border:1px solid #ffd4e9;border-radius:20px;padding:22px;font-family:'Dancing Script',cursive;font-size:clamp(1.35rem,4vw,2rem);box-shadow:0 0 30px #ff8cc855}
+#album{transition:transform 1s ease,opacity 1s ease}
+#album.leaving{transform:translateX(-115vw);opacity:0}
+@media (prefers-reduced-motion:reduce){#album,#bookShift,.cv,#msg,.heart-photo{transition-duration:.01ms!important}}
+
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<canvas id="rain"></canvas>
+
+<!-- Music button: top-left, stays on every screen -->
+<button id="musicBtn" class="hidden" aria-label="Toggle music">
+  <svg id="icoPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  <svg id="icoPause" viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+</button>
+
+<!-- Start screen (needed so the browser allows sound) -->
+<div id="start" class="screen">
+  <p class="startTxt">Are you ready for the surprise?</p>
+  <button id="startBtn">YES</button>
+</div>
+
+<div id="count" class="screen hidden"></div>
+<div id="word" class="screen hidden"><span>Happy</span><span>Birthday</span><span id="wName"></span></div>
+<img id="heart" class="hidden" src="demo-heart.png" alt="heart">
+
+<div id="charWrap" class="screen hidden"><img id="char" src="demo-character.png" alt=""></div>
+
+<div id="album" class="screen hidden">
+  <div id="stage">
+    <div id="msg"><span id="msgText"></span><i class="mh">💕</i></div>
+    <div id="bookShift">
+      <div id="book">
+        <div class="pg left"><img alt=""></div>
+        <div class="pg right"><img alt=""></div>
+        <div class="cv">
+          <div class="ft"><img src="demo-album-cover.png" alt="Album cover"><span class="tap">Tap to open</span></div>
+          <div class="bk"><img id="cvBack" alt=""></div>
+        </div>
+      </div>
+    </div>
+    <p class="hint" id="turnHint">tap the right / left page to turn</p>
+  </div>
+</div>
+
+<!-- Scroll finale: replace heart-01.jpg ... heart-30.jpg with your 30 portrait photos.
+     Replace final-character.png with your transparent PNG character. -->
+<div id="finale" aria-label="Photo heart finale">
+  <div id="scrollHint">✨ Keep scrolling to see the surprise ✨</div>
+  <div id="heartStage"></div>
+  <div id="finalMessage" class="hidden">
+    <img id="finalCharacter" src="final-character.png" alt="Birthday character">
+    <div class="finalCard">You make every moment beautiful. 💖<br>May your life always shine with love and happiness. ✨<br>Happy Birthday, Supriya — you are truly special! 🌷</div>
+  </div>
+</div>
+<canvas id="pop"></canvas>
+<script>
+/* ====== EDIT ME ====== */
+const CONFIG = {
+  name: "Supriya",
+  music: "birthday-music.mp3",
+  popSound: "popper-sound.mp3",
+  charSeconds: 5,
+  // each spread = 2 pages (left + right) and the message shown above the book
+  spreads: [
+    { left: "demo-photo-01.jpg", right: "demo-photo-02.jpg", text: "Happy birthday, my love ❤" },
+    { left: "demo-photo-03.jpg", right: "demo-photo-04.jpg", text: "As long as you're smiling, I'm happy." },
+    { left: "demo-photo-05.jpg", right: "demo-photo-06.jpg", text: "You make every day brighter ✨" },
+    { left: "demo-photo-07.jpg", right: "demo-photo-08.jpg", text: "Here's to us, forever 💖" }
+  ]
+};
+/* ===================== */
+
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const music = new Audio(CONFIG.music); music.loop = true; music.preload = "auto";
+const popSnd = new Audio(CONFIG.popSound); popSnd.preload = "auto";
+const musicBtn = $("musicBtn");
+
+/* Unlock audio on the first tap (browsers only allow sound after a user gesture) */
+function unlockAudio() {
+  [music, popSnd].forEach(a => {
+    a.muted = true;
+    const p = a.play();
+    const done = () => { a.pause(); a.currentTime = 0; a.muted = false; };
+    p ? p.then(done).catch(() => { a.muted = false; }) : done();
+  });
+}
+function playMusic() { music.play().catch(() => {}); }
+music.addEventListener("play", () => musicBtn.classList.add("playing"));
+music.addEventListener("pause", () => musicBtn.classList.remove("playing"));
+musicBtn.addEventListener("click", () => music.paused ? playMusic() : music.pause());
+function playPop() { const s = popSnd.cloneNode(); s.play().catch(() => {}); }
+
+/* Matrix rain */
+const rain = $("rain"), rc = rain.getContext("2d"); let rainOn = true, drops = [];
+function sizeRain() { rain.width = innerWidth; rain.height = innerHeight; drops = Array(Math.ceil(rain.width / 14)).fill(0).map(() => Math.random() * -50); }
+sizeRain(); addEventListener("resize", sizeRain);
+(function drawRain() {
+  if (!rainOn) return;
+  rc.fillStyle = "rgba(0,0,0,.1)"; rc.fillRect(0, 0, rain.width, rain.height);
+  rc.font = "bold 13px monospace";
+  const phrase = "happybirthdaysupriya";
+  drops.forEach((y, i) => {
+    rc.fillStyle = Math.random() > .9 ? "#ffd0ea" : "#ff2f92";
+    // Each rain stream spells the birthday greeting vertically, one letter per row.
+    const letter = phrase[Math.floor(y) % phrase.length];
+    rc.fillText(letter, i * 14, y * 14);
+    drops[i] = y * 14 > rain.height && Math.random() > .975 ? 0 : y + 1;
+  });
+  setTimeout(() => requestAnimationFrame(drawRain), 45);
+})();
+
+/* Stars */
+const st = $("stars"), sc = st.getContext("2d"); let stars = [];
+function sizeStars() { st.width = innerWidth; st.height = innerHeight; stars = Array.from({ length: 90 }, () => ({ x: Math.random() * st.width, y: Math.random() * st.height, r: Math.random() * 1.4 + .3, p: Math.random() * 6 })); }
+sizeStars(); addEventListener("resize", sizeStars);
+(function drawStars(t) {
+  sc.clearRect(0, 0, st.width, st.height); sc.fillStyle = "#fff";
+  stars.forEach(s => { sc.globalAlpha = .4 + .6 * Math.abs(Math.sin(t / 900 + s.p)); sc.beginPath(); sc.arc(s.x, s.y, s.r, 0, 7); sc.fill(); });
+  requestAnimationFrame(drawStars);
+})(0);
+
+/* Poppers from both bottom corners */
+const pc = $("pop"), px = pc.getContext("2d"); let parts = [], popRun = false;
+function sizePop() { pc.width = innerWidth; pc.height = innerHeight; } sizePop(); addEventListener("resize", sizePop);
+function blast() {
+  playPop();
+  const cols = ["#ff4d9d", "#ffd166", "#06d6a0", "#4cc9f0", "#fff", "#ff9e00", "#b388ff"];
+  [[0, 1], [1, -1]].forEach(([cx, dir]) => {
+    for (let i = 0; i < 70; i++) {
+      const a = (Math.PI / 180) * (45 + Math.random() * 35), v = (9 + Math.random() * 11) * (innerHeight / 700 + .5);
+      parts.push({ x: cx * pc.width, y: pc.height, vx: Math.cos(a) * v * dir, vy: -Math.sin(a) * v, w: 5 + Math.random() * 6, h: 3 + Math.random() * 5, c: cols[i % cols.length], r: Math.random() * 6, vr: Math.random() * .4 - .2, life: 1 });
+    }
+  });
+  if (!popRun) { popRun = true; stepPop(); }
+}
+function stepPop() {
+  px.clearRect(0, 0, pc.width, pc.height);
+  parts.forEach(p => { p.vy += .35; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life -= .006;
+    px.save(); px.globalAlpha = Math.max(p.life, 0); px.translate(p.x, p.y); px.rotate(p.r); px.fillStyle = p.c; px.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); px.restore(); });
+  parts = parts.filter(p => p.life > 0 && p.y < pc.height + 40);
+  parts.length ? requestAnimationFrame(stepPop) : (popRun = false, px.clearRect(0, 0, pc.width, pc.height));
+}
+
+/* Intro sequence */
+async function show(el, txt) { el.textContent = txt; el.classList.remove("hidden", "pulse"); void el.offsetWidth; el.classList.add("pulse"); }
+async function intro() {
+  $("start").classList.add("fade-away"); await sleep(800); $("start").classList.add("hidden");
+  for (const n of [3, 2, 1]) { await show($("count"), n); await sleep(1000); }
+  $("count").classList.add("hidden");
+  musicBtn.classList.remove("hidden"); playMusic();            // music starts with "Happy"
+  $("wName").textContent = CONFIG.name;                       // all three lines fade in together, slowly
+  rainOn = false; $("rain").classList.add("off");             // gently fade out the letter shower behind the greeting
+  $("word").classList.remove("hidden"); void $("word").offsetWidth; $("word").classList.add("slow");
+  await sleep(4200);
+  $("word").classList.add("hidden");
+  $("heart").classList.remove("hidden"); await sleep(2000);
+  $("heart").classList.add("hidden");
+  rainOn = false; $("rain").classList.add("off"); $("stars").classList.add("on");
+  $("charWrap").classList.remove("hidden");                    // your transparent PNG
+  blast(); setTimeout(blast, 1300);
+  await sleep(CONFIG.charSeconds * 1000);
+  // Smooth hand-over: character fades out, then the closed album fades/rises in.
+  $("charWrap").classList.add("fade-away"); await sleep(750);
+  $("charWrap").classList.add("hidden");
+  $("album").classList.remove("hidden"); $("album").classList.add("enter");
+  state = "closed";
+}
+$("startBtn").addEventListener("click", () => { unlockAudio(); intro(); });
+
+/* Closed album -> open spread */
+let cur = 0, busy = false, state = "wait";           // state: wait | closed | opening | open
+const L = document.querySelector(".pg.left img"), R = document.querySelector(".pg.right img");
+function setSpread(i) { L.src = CONFIG.spreads[i].left; R.src = CONFIG.spreads[i].right; }
+setSpread(0); $("cvBack").src = CONFIG.spreads[0].left;   // photo 1 on the cover's inside, photo 2 under the cover
+// preload every image so nothing pops in while animating
+[ "demo-album-cover.png", "demo-heart.png", "demo-character.png", "final-character.png",
+  ...CONFIG.spreads.flatMap(s => [s.left, s.right]),
+  ...Array.from({ length: 30 }, (_, i) => `heart-${String(i + 1).padStart(2, "0")}.jpg`)
+].forEach(src => { const im = new Image(); im.src = src; });
+async function typeMsg(t) { const el = $("msgText"), id = ++typeMsg.id; el.textContent = ""; for (const ch of t) { if (id !== typeMsg.id) return; el.textContent += ch; await sleep(55); } }
+typeMsg.id = 0;
+async function openAlbum() {
+  if (state !== "closed") return;
+  state = "opening"; busy = true;
+  $("bookShift").classList.add("opened");               // cover swings open + book glides to centre
+  await sleep(500); $("msg").classList.add("show"); typeMsg(CONFIG.spreads[0].text);
+  await sleep(900);                                     // cover has landed: photo 1 | photo 2 side by side
+  $("book").classList.add("ready");                     // swap flap for the identical real left page
+  $("turnHint").classList.add("show");
+  state = "open"; busy = false;
+}
+$("album").addEventListener("click", openAlbum);
+$("book").addEventListener("click", e => {
+  if (busy || state !== "open") return;
+  const r = $("book").getBoundingClientRect(), next = e.clientX - r.left > r.width / 2, to = cur + (next ? 1 : -1);
+  // On photo 8 (right side of the final spread), close the album and reveal the starry finale.
+  if (cur === CONFIG.spreads.length - 1 && next) { busy = true; closeAlbumToFinale(); return; }
+  if (to < 0 || to >= CONFIG.spreads.length) return;
+  busy = true;
+  const a = CONFIG.spreads[cur], b = CONFIG.spreads[to], f = document.createElement("div");
+  f.className = "fl " + (next ? "r" : "l");
+  f.innerHTML = `<div><img src="${next ? a.right : a.left}"></div><div class="bk"><img src="${next ? b.left : b.right}"></div>`;
+  next ? R.src = b.right : L.src = b.left;           // the page underneath
+  $("book").appendChild(f); void f.offsetWidth;
+  f.style.transform = `rotateY(${next ? -180 : 180}deg)`;
+  typeMsg(b.text);
+  setTimeout(() => { setSpread(to); f.remove(); cur = to; busy = false; }, 920);
+});
+
+
+/* ===== Scroll-driven 30-photo heart finale ===== */
+const finale = $("finale"), heartStage = $("heartStage"), hint = $("scrollHint"), finalMessage = $("finalMessage");
+let finaleStarted = false, finaleBase = 0, finaleMax = 1, finaleComplete = false;
+const heartPhotos = [];
+function buildHeartPhotos() {
+  if (heartPhotos.length) return;
+  for (let i = 1; i <= 30; i++) {
+    const img = document.createElement("img");
+    img.className = "heart-photo";
+    img.src = `heart-${String(i).padStart(2,"0")}.jpg`;
+    img.alt = `Birthday memory ${i}`;
+    img.onerror = () => { img.style.visibility = "hidden"; };
+    heartStage.appendChild(img); heartPhotos.push(img);
+  }
+}
+function heartPoint(i, total) {
+  const t = (Math.PI * 2 * i) / total;
+  // Softer, wider curves and fuller rounded lobes.
+  const x = 16 * Math.pow(Math.sin(t), 3);
+  const y = 12 * Math.cos(t) - 4.4 * Math.cos(2*t) - 1.5 * Math.cos(3*t) - 0.45 * Math.cos(4*t);
+  return { x: x / 17.5, y: -y / 16.5 };
+}
+function updateFinale() {
+  if (!finaleStarted) return;
+  // Scrolling downward drives the animation; the on-screen hint intentionally still says “Scroll up”.
+  const progress = Math.max(0, Math.min(1, (scrollY - finaleBase) / finaleMax));
+  hint.style.opacity = progress <= 0 ? "1" : "0";
+
+  const assembleEnd = .78, expandEnd = .92;
+  const assemble = Math.min(1, progress / assembleEnd);
+  const expand = Math.max(0, Math.min(1, (progress - assembleEnd) / (expandEnd - assembleEnd)));
+  heartPhotos.forEach((img, i) => {
+    const p = heartPoint(i, heartPhotos.length);
+    // Each image enters in sequence from below, then settles into its heart position.
+    const local = Math.max(0, Math.min(1, (assemble * heartPhotos.length) - i));
+    const ease = local * local * (3 - 2 * local);
+    const baseX = p.x * Math.min(innerWidth * .34, 158);
+    const baseY = p.y * Math.min(innerHeight * .28, 195);
+    const exitSpread = 1 + expand * 7.5;
+    const x = baseX * exitSpread;
+    const y = baseY * exitSpread;
+    const startY = innerHeight * .78;
+    const targetY = innerHeight / 2 + y;
+    const currentY = startY + (targetY - startY) * ease;
+    // Enter large, then shrink smoothly to a much smaller photo as it settles.
+    const baseScale = 3.35 - 2.35 * ease;
+    // Individual photos also grow as the assembled heart expands.
+    const expansionScale = 1 + expand * 3.4;
+    img.style.opacity = String(local === 0 ? 0 : Math.min(1, local * 2.5) * (expand > .88 ? Math.max(0, 1 - (expand - .88) / .12) : 1));
+    img.style.left = `calc(50% + ${x}px)`;
+    img.style.top = `${currentY}px`;
+    img.style.transform = `translate(-50%,-50%) rotate(${(i%5-2)*2}deg) scale(${baseScale * expansionScale})`;
+    img.style.zIndex = String(i + 1);
+  });
+  if (progress >= .90) {
+    finalMessage.classList.remove("hidden");
+    finalMessage.classList.add("visible");
+  } else {
+    finalMessage.classList.remove("visible");
+  }
+  finaleComplete = progress >= .995;
+}
+addEventListener("scroll", updateFinale, { passive:true });
+async function closeAlbumToFinale() {
+  // Return the cover to its original off-white closed state before sliding the album away.
+  $("bookShift").classList.remove("opened");
+  $("book").classList.remove("ready");
+  $("msg").classList.remove("show");
+  $("turnHint").classList.remove("show");
+  await sleep(950);
+  $("album").classList.add("leaving");
+  await sleep(1050);
+  $("album").classList.add("hidden");
+  finale.classList.add("active");
+  buildHeartPhotos();
+  finaleStarted = true;
+  await sleep(100);
+  // Begin at the top of the finale and let the user control progress by scrolling down.
+  // The instruction remains “Scroll up” as requested, even though the animation advances downward.
+  finaleBase = window.scrollY;
+  finaleMax = Math.max(1, document.documentElement.scrollHeight - innerHeight - finaleBase);
+  hint.style.opacity = "1";
+  updateFinale();
+}
+// After the final message, one further downward scroll can restart the experience.
+addEventListener("wheel", e => {
+  if (finaleComplete && e.deltaY > 0) location.reload();
+}, { passive:true });
+</script>
+</body>
+</html>
