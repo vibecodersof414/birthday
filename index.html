@@ -78,7 +78,7 @@ button{font:inherit}
 #turnHint.show{opacity:.6}
 
 /* Finale scroll choreography. The star canvas remains fixed behind everything. */
-#finale{display:none;position:relative;height:7600px;z-index:4;pointer-events:none}
+#finale{display:none;position:relative;height:15000px;z-index:4;pointer-events:none}
 #finale.active{display:block}
 #scrollHint{position:fixed;z-index:8;left:0;right:0;bottom:calc(12vh + env(safe-area-inset-bottom,0px));padding:0 18px;text-align:center;color:#ffe7a0;font-size:clamp(.95rem,4vw,1.2rem);font-weight:600;opacity:0;transition:opacity .8s;text-shadow:0 0 7px #fff1b0,0 0 16px #ffc83d,0 0 28px #ff9d00;animation:scrollGlow 1.8s ease-in-out infinite;pointer-events:none}
 @keyframes scrollGlow{0%,100%{filter:brightness(.62);text-shadow:0 0 5px #ffd76a,0 0 12px #ffb700;transform:translateY(0)}50%{filter:brightness(1.35);text-shadow:0 0 9px #fff4bd,0 0 22px #ffd34d,0 0 34px #ffad00;transform:translateY(-2px)}}
